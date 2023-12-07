@@ -3,13 +3,37 @@ use hyper::{Body, Request, Response, Server};
 use std::convert::Infallible;
 
 async fn handle_request(req: Request<Body>) -> Result<Response<Body>, Infallible> {
-    let response = Response::builder()
-        .status(200)
-        .header("Content-Type", "text/plain")
-        .body(Body::from("Hello, World!"))
-        .unwrap();
+    match (req.method(), req.uri().path()) {
+        // Define different routes based on HTTP method and path
+        (&hyper::Method::GET, "/") => {
+            let response = Response::builder()
+                .status(200)
+                .header("Content-Type", "text/plain")
+                .body(Body::from("Hello, World!"))
+                .unwrap();
 
-    Ok(response)
+            Ok(response)
+        }
+        (&hyper::Method::GET, "/api/greet") => {
+            let response = Response::builder()
+                .status(200)
+                .header("Content-Type", "text/plain")
+                .body(Body::from("Greetings from the API!"))
+                .unwrap();
+
+            Ok(response)
+        }
+        // Handle 404 for unknown routes
+        _ => {
+            let response = Response::builder()
+                .status(404)
+                .header("Content-Type", "text/plain")
+                .body(Body::from("Not Found"))
+                .unwrap();
+
+            Ok(response)
+        }
+    }
 }
 
 #[tokio::main]
